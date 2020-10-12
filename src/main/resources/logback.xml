@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="APP" value="myApp"/>
+    <property name="LOG_PATH" value="target/"/>
+
+    <property name="APP_LOG" value="${LOG_PATH}${APP}"/>
+    <property name="APP_LOG_TROUBLESHOOTING" value="${APP_LOG}-troubleshooting"/>
+
+    <property name="FILE_PATTERN" value="%date %-5level [%thread] %logger{10} %logger{36}.%M:%L -%marker %msg%n"/>
+    <property name="CONSOLE_PATTERN" value="%-5level [%thread] %logger{36}.%M:%L -%marker %msg%n"/>
+
+    <!-- LOG LEVEL CONFIG -->
+    <property name="APP_LOG_LEVEL" value="TRACE"/>
+    <property name="OTHER_LOG_LEVEL" value="ERROR"/>
+    <property name="ROOT_LOG_LEVEL" value="WARN"/>
+
+    <property name="LOG_FILE_MAX_SIZE" value="1MB"/>
+    <property name="LOG_DAILY_MAX_HISTORY" value="5"/>
+    <property name="LOG_TOTAL_MAX_SIZE" value="2MB"/>
+
+    <!-- COPY PROPERTY OUT OF THE COMMENT, WE ARE JUST CHECKING IF THE ATTRIBUTE EXISTS
+        <property name="ENABLE_CONSOLE" value="TRUE"/>
+        <property name="ENABLE_TROUBLESHOOTING" value="TRUE"/>
+    -->
+    <property name="ENABLE_CONSOLE" value="TRUE"/>
+    <property name="ENABLE_TROUBLESHOOTING" value="TRUE"/>
+
+    <if condition='isDefined("PROD")'>
+        <then>
+            <property name="LOG_FILE_MAX_SIZE" value="10MB"/>
+            <property name="LOG_DAILY_MAX_HISTORY" value="30"/>
+            <property name="LOG_TOTAL_MAX_SIZE" value="100MB"/>
+        </then>
+    </if>
+
+    <appender name="FILE-ROLLOVER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG}.log</file>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>CONFIDENTIAL</marker>
+            </evaluator>
+            <onMatch>DENY</onMatch>
+            <onMismatch>NEUTRAL</onMismatch>
+        </filter>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${APP_LOG}.%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxFileSize>${LOG_FILE_MAX_SIZE}</maxFileSize>
+            <maxHistory>${LOG_DAILY_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${LOG_TOTAL_MAX_SIZE}</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="eze.poc.logback" level="${APP_LOG_LEVEL}"/>
+
+    <if condition='isDefined("ENABLE_CONSOLE")'>
+        <then>
+            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>${CONSOLE_PATTERN}</pattern>
+                </encoder>
+            </appender>
+            <root level="${ROOT_LOG_LEVEL}">
+                <appender-ref ref="CONSOLE"/>
+            </root>
+        </then>
+    </if>
+
+    <if condition='isDefined("ENABLE_TROUBLESHOOTING")'>
+        <then>
+            <appender name="FILE-TROUBLESHOOTING" class="ch.qos.logback.core.FileAppender">
+                <file>${APP_LOG_TROUBLESHOOTING}.log</file>
+                <append>false</append>
+                <encoder>
+                    <pattern>${FILE_PATTERN}</pattern>
+                </encoder>
+            </appender>
+            <root level="${ROOT_LOG_LEVEL}">
+                <appender-ref ref="FILE-TROUBLESHOOTING"/>
+            </root>
+        </then>
+    </if>
+
+    <root level="${ROOT_LOG_LEVEL}">
+        <appender-ref ref="FILE-ROLLOVER"/>
+    </root>
+
+</configuration>
