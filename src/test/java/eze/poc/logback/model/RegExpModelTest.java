@@ -10,8 +10,8 @@ import static org.hamcrest.core.StringStartsWith.startsWith;
 public class RegExpModelTest {
 
     private static final String REG_EXP_CONFIDENTIAL_REPLACE = "ssn='(.*?)'|address='(.*?)'";
-    public static final String REX_EXP_CONFIDENTIAL_MATCHES = "(.*?)ssn=(.*?)|(.*?)address=(.*?)";
-    public static final String CONFIDENTIAL_SUFFIX = ">>> SHOULD BE MASKED: ";
+    private static final String REX_EXP_CONFIDENTIAL_MATCHES = "(.*?)ssn=(.*?)|(.*?)address=(.*?)";
+    private static final String CONFIDENTIAL_SUFFIX = ">>> SHOULD BE MASKED: ";
 
     @Test
     public void replaceAll_withModelHavingConfidentialFields_shouldReturnMaskedString() {
