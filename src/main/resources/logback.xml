@@ -7,24 +7,26 @@
     <property name="APP_LOG" value="${LOG_PATH}${APP}"/>
     <property name="APP_LOG_TROUBLESHOOTING" value="${APP_LOG}-troubleshooting"/>
 
+    <!-- date details in logs file -->
     <property name="FILE_PATTERN" value="%date %-5level [%thread] %logger{10} %logger{36}.%M:%L -%marker %msg%n"/>
+    <!-- date details not needed in console -->
     <property name="CONSOLE_PATTERN" value="%-5level [%thread] %logger{36}.%M:%L -%marker %msg%n"/>
 
-    <!-- LOG LEVEL CONFIG -->
+    <!-- log level config -->
     <property name="APP_LOG_LEVEL" value="TRACE"/>
-    <property name="OTHER_LOG_LEVEL" value="ERROR"/>
-    <property name="ROOT_LOG_LEVEL" value="WARN"/>
+    <property name="ROOT_LOG_LEVEL" value="TRACE"/>
 
+    <!-- log level high environments -->
+    <property name="HIGH_ENV_LEVEL" value="INFO"/>
+
+    <!-- rollover log config ENV dependent -->
     <property name="LOG_FILE_MAX_SIZE" value="1MB"/>
     <property name="LOG_DAILY_MAX_HISTORY" value="5"/>
     <property name="LOG_TOTAL_MAX_SIZE" value="2MB"/>
 
-    <!-- COPY PROPERTY OUT OF THE COMMENT, WE ARE JUST CHECKING IF THE ATTRIBUTE EXISTS
-        <property name="ENABLE_CONSOLE" value="TRUE"/>
-        <property name="ENABLE_TROUBLESHOOTING" value="TRUE"/>
-    -->
-    <property name="ENABLE_CONSOLE" value="TRUE"/>
-    <property name="ENABLE_TROUBLESHOOTING" value="TRUE"/>
+    <!-- env variables -->
+    <property name="ENABLE_CONSOLE_PARAM" value="enableConsole"/>
+    <property name="ENABLE_TROUBLESHOOTING_PARAM" value="enableTroubleshooting"/>
 
     <if condition='isDefined("PROD")'>
         <then>
@@ -36,17 +38,15 @@
 
     <appender name="FILE-ROLLOVER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${APP_LOG}.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${HIGH_ENV_LEVEL}</level>
+        </filter>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>CONFIDENTIAL</marker>
             </evaluator>
             <onMatch>DENY</onMatch>
             <onMismatch>NEUTRAL</onMismatch>
-        </filter>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${APP_LOG}.%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
@@ -61,22 +61,24 @@
 
     <logger name="eze.poc.logback" level="${APP_LOG_LEVEL}"/>
 
-    <if condition='isDefined("ENABLE_CONSOLE")'>
+    <if condition='isDefined("${ENABLE_CONSOLE_PARAM}")'>
         <then>
-            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <property name="CONSOLE_APPENDER_NAME" value="CONSOLE"/>
+            <appender name="${CONSOLE_APPENDER_NAME}" class="ch.qos.logback.core.ConsoleAppender">
                 <encoder>
                     <pattern>${CONSOLE_PATTERN}</pattern>
                 </encoder>
             </appender>
             <root level="${ROOT_LOG_LEVEL}">
-                <appender-ref ref="CONSOLE"/>
+                <appender-ref ref="${CONSOLE_APPENDER_NAME}"/>
             </root>
         </then>
     </if>
 
-    <if condition='isDefined("ENABLE_TROUBLESHOOTING")'>
+    <if condition='isDefined("${ENABLE_TROUBLESHOOTING_PARAM}")'>
         <then>
-            <appender name="FILE-TROUBLESHOOTING" class="ch.qos.logback.core.FileAppender">
+            <property name="TROUBLESHOOTING_APPENDER_NAME" value="FILE-TROUBLESHOOTING"/>
+            <appender name="${TROUBLESHOOTING_APPENDER_NAME}" class="ch.qos.logback.core.FileAppender">
                 <file>${APP_LOG_TROUBLESHOOTING}.log</file>
                 <append>false</append>
                 <encoder>
@@ -84,7 +86,7 @@
                 </encoder>
             </appender>
             <root level="${ROOT_LOG_LEVEL}">
-                <appender-ref ref="FILE-TROUBLESHOOTING"/>
+                <appender-ref ref="${TROUBLESHOOTING_APPENDER_NAME}"/>
             </root>
         </then>
     </if>

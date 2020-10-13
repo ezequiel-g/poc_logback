@@ -9,18 +9,34 @@ import static org.hamcrest.core.StringStartsWith.startsWith;
 
 public class RegExpModelTest {
 
-    private static final String REG_EXP_CONFIDENTIAL_REPLACE = "ssn='(.*?)'|address='(.*?)'";
-    private static final String REX_EXP_CONFIDENTIAL_MATCHES = "(.*?)ssn=(.*?)|(.*?)address=(.*?)";
+    private static final ModelConfidential MODEL_CONFIDENTIAL = new ModelConfidential();
+    private static final ModelMisc MODEL_MISC = new ModelMisc();
+
     private static final String CONFIDENTIAL_SUFFIX = ">>> SHOULD BE MASKED: ";
+    private static final String REX_EXP_CONFIDENTIAL_MATCHES = "(.*?)ssn=(.*?)|(.*?)address=(.*?)";
+
+    private static final String HIDDEN_FIELD_MASK = "*hiddenField*";
+    private static final String REG_EXP_CONFIDENTIAL_REPLACE = "ssn='(.*?)'|address='(.*?)'";
+
+    static {
+        MODEL_CONFIDENTIAL.setId(123L);
+        MODEL_CONFIDENTIAL.setAddress(" Any Street ");
+        MODEL_CONFIDENTIAL.setCountryId(" Any Country Id ");
+        MODEL_CONFIDENTIAL.setSsn(" Any Security Number ");
+        MODEL_CONFIDENTIAL.setOtherField(" Any Other Field ");
+
+        MODEL_MISC.setKey(321);
+        MODEL_MISC.setValue(" Any Value ");
+    }
 
     @Test
     public void replaceAll_withModelHavingConfidentialFields_shouldReturnMaskedString() {
         // arrange
-        final String input = buildConfidentialModel(1).toString();
-        final String expected = "ModelWithConfidential[id=1, *hiddenField*, countryId=' Any Country Id ', *hiddenField*, otherField=' Any Other Field ']";
+        final String input = MODEL_CONFIDENTIAL.toString();
+        final String expected = "ModelConfidential[id=123, *hiddenField*, countryId=' Any Country Id ', *hiddenField*, otherField=' Any Other Field ']";
 
         // act
-        final String actual = input.replaceAll(REG_EXP_CONFIDENTIAL_REPLACE, "*hiddenField*");
+        final String actual = input.replaceAll(REG_EXP_CONFIDENTIAL_REPLACE, HIDDEN_FIELD_MASK);
 
         // assert
         assertThat(actual, is(expected));
@@ -29,11 +45,11 @@ public class RegExpModelTest {
     @Test
     public void replaceAll_withModelMiscFields_shouldReturnMaskedString() {
         // arrange
-        final String input = buildMiscModel(2).toString();
-        final String expected = "ModelMisc[key=2, value=' Any Value ']";
+        final String input = MODEL_MISC.toString();
+        final String expected = "ModelMisc[key=321, value=' Any Value ']";
 
         // act
-        final String actual = input.replaceAll(REG_EXP_CONFIDENTIAL_REPLACE, "*hiddenField*");
+        final String actual = input.replaceAll(REG_EXP_CONFIDENTIAL_REPLACE, HIDDEN_FIELD_MASK);
 
         // assert
         assertThat(actual, is(expected));
@@ -42,7 +58,7 @@ public class RegExpModelTest {
     @Test
     public void matches_withConfidential_shouldReturnTrue() {
         // arrange
-        final String input = buildConfidentialModel(123).toString();
+        final String input = MODEL_CONFIDENTIAL.toString();
         final boolean expected = true;
 
         // act
@@ -55,7 +71,7 @@ public class RegExpModelTest {
     @Test
     public void matches_withMisc_shouldReturnFalse() {
         // arrange
-        final String input = buildMiscModel(123).toString();
+        final String input = MODEL_MISC.toString();
         final boolean expected = false;
 
         // act
@@ -68,41 +84,25 @@ public class RegExpModelTest {
     @Test
     public void addSuffix_withConfidential_shouldStartWithSuffix() {
         // arrange
-        final String input = buildConfidentialModel(123).toString();
+        final String input = MODEL_CONFIDENTIAL.toString();
 
         // act
         final String actual = input.matches(REX_EXP_CONFIDENTIAL_MATCHES) ? CONFIDENTIAL_SUFFIX.concat(input) : input;
 
         // assert
-        assertThat(actual, startsWith(">>> SHOULD BE MASKED: "));
+        assertThat(actual, startsWith(CONFIDENTIAL_SUFFIX));
     }
 
     @Test
     public void addSuffix_withMisc_shouldNotStartWithSuffix() {
         // arrange
-        final String input = buildMiscModel(123).toString();
+        final String input = MODEL_MISC.toString();
 
         // act
         final String actual = input.matches(REX_EXP_CONFIDENTIAL_MATCHES) ? CONFIDENTIAL_SUFFIX.concat(input) : input;
 
         // assert
-        assertThat(actual, not(startsWith(">>> SHOULD BE MASKED: ")));
+        assertThat(actual, not(startsWith(CONFIDENTIAL_SUFFIX)));
     }
 
-    private ModelConfidential buildConfidentialModel(final int id) {
-        final ModelConfidential model = new ModelConfidential();
-        model.setId(id);
-        model.setCountryId(" Any Country Id ");
-        model.setSsn(" Any Security Number ");
-        model.setAddress(" Any Street ");
-        model.setOtherField(" Any Other Field ");
-        return model;
-    }
-
-    private ModelMisc buildMiscModel(final int key) {
-        final ModelMisc model = new ModelMisc();
-        model.setKey(key);
-        model.setValue(" Any Value ");
-        return model;
-    }
 }

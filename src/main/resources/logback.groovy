@@ -1,6 +1,6 @@
 import ch.qos.logback.classic.boolex.OnMarkerEvaluator
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.classic.filter.LevelFilter
+import ch.qos.logback.classic.filter.ThresholdFilter
 import ch.qos.logback.core.filter.EvaluatorFilter
 
 import static ch.qos.logback.classic.Level.*
@@ -12,12 +12,19 @@ final LOG_PATH = "target/"
 final APP_LOG = LOG_PATH + APP
 final APP_LOG_TROUBLESHOOTING = APP_LOG + "-troubleshooting"
 
+// date details in logs file
 final FILE_PATTERN = "%date %-5level [%thread] %logger{10} %logger{36}.%M:%L -%marker %msg%n"
+// date details not needed in console
 final CONSOLE_PATTERN = "%-5level [%thread] %logger{36}.%M:%L -%marker %msg%n"
 
+// log level config
 final APP_LOG_LEVEL = TRACE
 final ROOT_LOG_LEVEL = WARN
 
+// log level high environments
+final HIGH_ENV_LEVEL = INFO
+
+// rollover log config ENV dependent
 def LOG_FILE_MAX_SIZE = "1MB"
 def LOG_DAILY_MAX_HISTORY = 5
 def LOG_TOTAL_MAX_SIZE = "2MB"
@@ -25,6 +32,10 @@ def LOG_TOTAL_MAX_SIZE = "2MB"
 final FILE_APPENDER = "FILE-ROLLOVER"
 appender(FILE_APPENDER, RollingFileAppender) {
     file = APP_LOG + ".log"
+    // make sure only INFO level is being send to rolling appender
+    filter(ThresholdFilter) {
+        level = HIGH_ENV_LEVEL
+    }
     // make sure marker confidential is not being sent to rolling appender
     filter(EvaluatorFilter) {
         evaluator(OnMarkerEvaluator) {
@@ -32,12 +43,6 @@ appender(FILE_APPENDER, RollingFileAppender) {
         }
         onMatch = DENY
         onMismatch = NEUTRAL
-    }
-    // make sure only INFO level is being send to rolling appender
-    filter(LevelFilter) {
-        level = INFO
-        onMatch = ACCEPT
-        onMismatch = DENY
     }
     rollingPolicy(SizeAndTimeBasedRollingPolicy) {
         fileNamePattern = APP_LOG + ".%d{yyyy-MM-dd}-%i.log.gz"
