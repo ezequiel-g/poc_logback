@@ -8,9 +8,9 @@
     <property name="APP_LOG_TROUBLESHOOTING" value="${APP_LOG}-troubleshooting"/>
 
     <!-- date details in logs file -->
-    <property name="FILE_PATTERN" value="%date %-5level [%thread] %logger{10} %logger{36}.%M:%L -%marker %msg%n"/>
+    <property name="FILE_PATTERN" value="%date %-5level [%thread] %logger{10}.%method:%line -%marker %msg%n"/>
     <!-- date details not needed in console -->
-    <property name="CONSOLE_PATTERN" value="%-5level [%thread] %logger{36}.%M:%L -%marker %msg%n"/>
+    <property name="CONSOLE_PATTERN" value="%-5level [%thread] %logger{10}.%method:%line -%marker %msg%n"/>
 
     <!-- log level config -->
     <property name="APP_LOG_LEVEL" value="TRACE"/>

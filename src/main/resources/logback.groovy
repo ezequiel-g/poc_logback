@@ -13,9 +13,9 @@ final APP_LOG = LOG_PATH + APP
 final APP_LOG_TROUBLESHOOTING = APP_LOG + "-troubleshooting"
 
 // date details in logs file
-final FILE_PATTERN = "%date %-5level [%thread] %logger{10} %logger{36}.%M:%L -%marker %msg%n"
+final FILE_PATTERN = "%date %-5level [%thread] %logger{10}.%M:%L -%marker %msg%n"
 // date details not needed in console
-final CONSOLE_PATTERN = "%-5level [%thread] %logger{36}.%M:%L -%marker %msg%n"
+final CONSOLE_PATTERN = "%-5level [%thread] %logger{10}.%M:%L -%marker %msg%n"
 
 // log level config
 final APP_LOG_LEVEL = TRACE
