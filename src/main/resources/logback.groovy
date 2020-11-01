@@ -60,7 +60,7 @@ final APPENDER_LIST = [FILE_APPENDER]
 if (Objects.nonNull(System.getenv("enableTroubleshooting"))) {
     final FILE_TROUBLESHOOTING = "TROUBLESHOOTING"
     appender(FILE_TROUBLESHOOTING, FileAppender) {
-        file = APP_LOG_TROUBLESHOOTING
+        file = APP_LOG_TROUBLESHOOTING + ".log"
         append = false
         encoder(PatternLayoutEncoder) {
             pattern = FILE_PATTERN
