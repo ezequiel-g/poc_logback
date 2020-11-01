@@ -12,13 +12,28 @@ Probe of concept created to check some capabilities related to logback.
     so that I do not need to review the logs to remove confidential data later.
     I just want to remove the file used while troubleshooting.
 
+## Usage
 
+### IDE Console log
+Will show confidential data when running application locally.
+* to enable console log, it just required not to be null.
+    enableConsole=true;
+    
+#### CHECK LOG
+Is a helpful log which will include message which contains only confidential attributes. Only available when CONSOLE log is enable.
+* log with the CONFIDENTIAL marker, are not a problem here, because logs with the marker won't be included in application log.
+* logs without the CONFIDENTIAL marker, are an ISSUE, it means that private data will be shown in application log.
 
-to enable console log, it just required not to be null
-enableConsole=true
+### TROUBLESHOOTING log
+Will show confidential data in a separated file.
+* to enable troubleshooting log,
+ enableTroubleshooting=true;
+*  It can be enabled for local or lower envs, to get extra details.
+*  It can be enabled ad hoc in PRODUCTION for troubleshooting, it will log in a separated file that can be removed later.
 
-to enable troubleshooting log,
-enableTroubleshooting=true
+### APPLICATION log
+Won't show confidential data if CONFIDENTIAL marker is present.
+It also has fixed log level to INFO. Even when root log level is changes production will only log INFO level.
 
 # Links
 * http://logback.qos.ch/manual/groovy.html

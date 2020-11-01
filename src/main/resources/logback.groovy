@@ -1,3 +1,4 @@
+import ch.qos.logback.classic.boolex.JaninoEventEvaluator
 import ch.qos.logback.classic.boolex.OnMarkerEvaluator
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.filter.ThresholdFilter
@@ -11,6 +12,7 @@ final LOG_PATH = "target/"
 
 final APP_LOG = LOG_PATH + APP
 final APP_LOG_TROUBLESHOOTING = APP_LOG + "-troubleshooting"
+final APP_LOG_CHECK = APP_LOG + "-check"
 
 // date details in logs file
 final FILE_PATTERN = "%date %-5level [%thread] %logger{10}.%M:%L -%marker %msg%n"
@@ -79,6 +81,25 @@ if (Objects.nonNull(System.getenv("enableConsole"))) {
     }
 
     APPENDER_LIST.add(CONSOLE_APPENDER)
+
+    final CONFIDENTIAL_CHECK = "CONFIDENTIAL_CHECK"
+    appender(CONFIDENTIAL_CHECK, FileAppender) {
+        file = APP_LOG_CHECK + ".log"
+        append = false
+        filter(EvaluatorFilter) {
+            evaluator(JaninoEventEvaluator) {
+                expression = 'return formattedMessage.matches("(.*?)( ssn=)(.*?)|(.*?)( address=)(.*?)");'
+            }
+            onMatch = NEUTRAL
+            onMismatch = DENY
+        }
+        encoder(PatternLayoutEncoder) {
+            pattern = FILE_PATTERN
+        }
+    }
+
+    APPENDER_LIST.add(CONFIDENTIAL_CHECK)
+
 }
 
 logger("eze.poc.logback", APP_LOG_LEVEL)
