@@ -13,7 +13,7 @@ public class RegExpModelTest {
     private static final ModelMisc MODEL_MISC = new ModelMisc();
 
     private static final String CONFIDENTIAL_SUFFIX = ">>> SHOULD BE MASKED: ";
-    private static final String REX_EXP_CONFIDENTIAL_MATCHES = "(.*?)ssn=(.*?)|(.*?)address=(.*?)";
+    private static final String REX_EXP_CONFIDENTIAL_MATCHES = "(.*?)( ssn=)(.*?)|(.*?)( address=)(.*?)";
 
     private static final String HIDDEN_FIELD_MASK = "*hiddenField*";
     private static final String REG_EXP_CONFIDENTIAL_REPLACE = "ssn='(.*?)'|address='(.*?)'";
