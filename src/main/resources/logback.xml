@@ -6,6 +6,7 @@
 
     <property name="APP_LOG" value="${LOG_PATH}${APP}"/>
     <property name="APP_LOG_TROUBLESHOOTING" value="${APP_LOG}-troubleshooting"/>
+    <property name="APP_LOG_CHECK" value="${APP_LOG}-check"/>
 
     <!-- date details in logs file -->
     <property name="FILE_PATTERN" value="%date %-5level [%thread] %logger{10}.%method:%line -%marker %msg%n"/>
@@ -71,6 +72,26 @@
             </appender>
             <root level="${ROOT_LOG_LEVEL}">
                 <appender-ref ref="${CONSOLE_APPENDER_NAME}"/>
+            </root>
+
+            <property name="CONFIDENTIAL_CHECK" value="CONFIDENTIAL_CHECK"/>
+            <property name="CONFIDENTIAL_REG_EXP" value="(.*?)( ssn=)(.*?)|(.*?)( address=)(.*?)"/>
+            <appender name="${CONFIDENTIAL_CHECK}" class="ch.qos.logback.core.FileAppender">
+                <file>${APP_LOG_CHECK}.log</file>
+                <append>false</append>
+                <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+                    <evaluator>
+                        <expression>return formattedMessage.matches("${CONFIDENTIAL_REG_EXP}");</expression>
+                    </evaluator>
+                    <onMatch>NEUTRAL</onMatch>
+                    <onMismatch>DENY</onMismatch>
+                </filter>
+                <encoder>
+                    <pattern>${FILE_PATTERN}</pattern>
+                </encoder>
+            </appender>
+            <root level="${ROOT_LOG_LEVEL}">
+                <appender-ref ref="${CONFIDENTIAL_CHECK}"/>
             </root>
         </then>
     </if>
