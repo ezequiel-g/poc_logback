@@ -12,7 +12,10 @@ public class App {
 	private static final Marker CONFIDENTIAL = MarkerFactory.getMarker("CONFIDENTIAL");
 	private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
-	private static final String SEPARATOR = "##################################################";
+	private static final String SEPARATOR = "########### : {}";
+	private static final String FMT_MISC_MODEL = "miscModel: {}";
+	private static final String FMT_UNSAFE_CONFIDENTIAL = "confidentialModel: {}";
+	private static final String FMT_SAFE_CONFIDENTIAL_ATTR = "safe confidential >>> data id: {}, countryId: {}";
 
 	private static final ModelConfidential MODEL_CONFIDENTIAL = new ModelConfidential();
 	private static final ModelMisc MODEL_MISC = new ModelMisc();
@@ -41,63 +44,60 @@ public class App {
 
 		allLevelsConfidential();
 
-		allLevelsToBe();
-
-		allLevelsHighlightConfidentials();
+		allLevelsMissedMarker();
 	}
 
 	/**
 	 * this logs should be shown base in the root level configured
 	 */
 	private void allLevels() {
-		LOG.info(SEPARATOR);
-		LOG.trace("my trace: {}", MODEL_MISC);
-		LOG.debug("my debug: {}", MODEL_MISC);
-		LOG.info("my info: {}", MODEL_MISC);
-		LOG.warn("my warn: {}", MODEL_MISC);
-		LOG.error("my error: {}", MODEL_MISC);
+		LOG.info(SEPARATOR, "misc models does not include private data");
+
+		LOG.trace(FMT_MISC_MODEL, MODEL_MISC);
+
+		LOG.debug(FMT_MISC_MODEL, MODEL_MISC);
+
+		LOG.info(FMT_MISC_MODEL, MODEL_MISC);
+
+		LOG.warn(FMT_MISC_MODEL, MODEL_MISC);
+
+		LOG.error(FMT_MISC_MODEL, MODEL_MISC);
 	}
 
 	/**
 	 * this logs should only be shown in troubleshooting logs.
 	 */
 	private void allLevelsConfidential() {
-		LOG.info(SEPARATOR);
-		LOG.info("my safe log id: {}, countryId: {}", MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
-		LOG.trace(CONFIDENTIAL, "---> trace: {}", MODEL_CONFIDENTIAL);
-		LOG.info("my safe log id: {}, countryId: {}", MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
-		LOG.debug(CONFIDENTIAL, "---> debug: {}", MODEL_CONFIDENTIAL);
-		LOG.info("my safe log id: {}, countryId: {}", MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
-		LOG.info(CONFIDENTIAL, "---> info: {}", MODEL_CONFIDENTIAL);
-		LOG.info("my safe log id: {}, countryId: {}", MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
-		LOG.warn(CONFIDENTIAL, "---> warn: {}", MODEL_CONFIDENTIAL);
-		LOG.info("my safe log id: {}, countryId: {}", MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
-		LOG.error(CONFIDENTIAL, "---> error: {}", MODEL_CONFIDENTIAL);
+		LOG.info(SEPARATOR, "safe confidential, allow to log confidential model attributes which are safe to shown");
+		LOG.info(SEPARATOR, "confidential models include private data, need to include CONFIDENTIAL marker.");
+
+		LOG.trace(FMT_SAFE_CONFIDENTIAL_ATTR, MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
+		LOG.trace(CONFIDENTIAL, FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
+
+		LOG.debug(FMT_SAFE_CONFIDENTIAL_ATTR, MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
+		LOG.debug(CONFIDENTIAL, FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
+
+		LOG.info(FMT_SAFE_CONFIDENTIAL_ATTR, MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
+		LOG.info(CONFIDENTIAL, FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
+
+		LOG.warn(FMT_SAFE_CONFIDENTIAL_ATTR, MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
+		LOG.warn(CONFIDENTIAL, FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
+
+		LOG.error(FMT_SAFE_CONFIDENTIAL_ATTR, MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
+		LOG.error(CONFIDENTIAL, FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
 	}
 
-	/**
-	 * this is the main idea about how it should be used in the app. using debug/trace for adding extra details.
-	 */
-	private void allLevelsToBe() {
-		LOG.info(SEPARATOR);
-		LOG.info("my safe log id: {}, countryId: {}", MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
-		LOG.trace(CONFIDENTIAL, "---> trace: {}", MODEL_CONFIDENTIAL);
-		LOG.info("my safe log id: {}, countryId: {}", MODEL_CONFIDENTIAL.getId(), MODEL_CONFIDENTIAL.getCountryId());
-		LOG.debug(CONFIDENTIAL, "---> debug: {}", MODEL_CONFIDENTIAL);
-		LOG.info("my safe info: {}", MODEL_MISC);
-		LOG.warn("my safe warn: {}", MODEL_MISC);
-		LOG.error("my safe error: {}", MODEL_MISC);
-	}
+	private void allLevelsMissedMarker() {
+		LOG.info(SEPARATOR, "confidential data missing CONFIDENTIAL marker. Wrong usage logging private attributes ' ssn=', ' address='");
+		LOG.trace(FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
 
+		LOG.debug(FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
 
-	private void allLevelsHighlightConfidentials() {
-		LOG.info(SEPARATOR);
-		// TODO THIS SHOULD BE HIGHLIGHTED IN THE LOGS.
-		LOG.trace("---> trace: {}", MODEL_CONFIDENTIAL);
-		LOG.debug("---> debug: {}", MODEL_CONFIDENTIAL);
-		LOG.info("---> info: {}", MODEL_CONFIDENTIAL);
-		LOG.warn("---> warn: {}", MODEL_CONFIDENTIAL);
-		LOG.error( "---> error: {}", MODEL_CONFIDENTIAL);
+		LOG.info(FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
+
+		LOG.warn(FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
+
+		LOG.error(FMT_UNSAFE_CONFIDENTIAL, MODEL_CONFIDENTIAL);
 	}
 
 }
